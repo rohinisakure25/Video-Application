@@ -3,6 +3,8 @@ import mongoose from 'mongoose';
 import { createServer } from "node:http";
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from "path";
+dotenv.config({ path: path.resolve(process.cwd(), "../.env") });
 import userRoutes from './routes/users.routes.js';
 import connectToSocket from './controllers/socketManager.js';
 
@@ -16,7 +18,11 @@ const server = createServer(app);
 const io = connectToSocket(server);
 
 // 3. Middlewares
-app.use(cors());
+app.use(cors({
+    origin: "*", 
+    methods: ["GET", "POST"],
+    credentials: true
+}));
 app.use(express.json({ limit: "40kb" }));
 app.use(express.urlencoded({ limit: "40kb", extended: true }));
 
@@ -32,18 +38,22 @@ app.use((err, req, res, next) => {
 // 6. Database and Server Start
 const PORT = process.env.PORT || 8000;
 
-const start = async () => {
-    try {
-        const connectionDb = await mongoose.connect(process.env.MONGO_URI);
-        console.log(`✅ MongoDB Connected: ${connectionDb.connection.host}`);
-        
-        server.listen(PORT, () => {
-            console.log(`🚀 Server running on port ${PORT}`);
-        });
-    } catch (error) {
-        console.error("❌ Database connection failed:", error);
-        process.exit(1); // Exit process with failure
-    }
-}
 
-start();
+
+
+const mongoURI = process.env.MONGO_URI; 
+
+const connectDB = async () => {
+    try {
+        // Attempt to connect
+        await mongoose.connect(mongoURI);
+        console.log("✅ Successfully connected to MongoDB Atlas");
+    } catch (err) {
+        // Log detailed error if connection fails
+        console.error("❌ MongoDB connection error:", err.message);
+        process.exit(1); // Stop the server if the database is not reachable
+    }
+};
+
+connectDB();
+
