@@ -4,12 +4,9 @@ import { createServer } from "node:http";
 import cors from 'cors';
 import dotenv from 'dotenv';
 import path from "path";
-dotenv.config({ path: path.resolve(process.cwd(), "../.env") });
+dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 import userRoutes from './routes/users.routes.js';
 import connectToSocket from './controllers/socketManager.js';
-
-// 1. Initialize Configuration
-dotenv.config();
 const app = express();
 const server = createServer(app);
 
@@ -56,4 +53,6 @@ const connectDB = async () => {
 };
 
 connectDB();
-
+server.listen(PORT, "0.0.0.0", () => {
+    console.log(`🚀 Server is running on port ${PORT}`);
+});
